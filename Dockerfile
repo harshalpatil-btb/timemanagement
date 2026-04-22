@@ -5,7 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
-COPY dashboard/ ./dashboard/
+COPY dashboard ./dashboard
 
 RUN mkdir -p /data
 ENV DB_PATH=/data/timetrack.db
