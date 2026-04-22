@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: timetrack
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: ADMIN_PASSWORD
+        generateValue: false
+        value: changeme123       # CHANGE THIS before deploying
+      - key: DB_PATH
+        value: /data/timetrack.db
+
+    disk:
+      name: timetrack-data
+      mountPath: /data
+      sizeGB: 1                  # free tier: 1 GB is plenty

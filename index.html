@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TimeTrack Admin</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:     #07090f;
+  --s1:     #0c1018;
+  --s2:     #111827;
+  --s3:     #1a2332;
+  --bd:     #1e2d3d;
+  --bd2:    #2a3f55;
+  --tx:     #c8d8e8;
+  --muted:  #4a6075;
+  --hi:     #29b6f6;
+  --hi2:    #7c83f5;
+  --green:  #2dd4aa;
+  --amber:  #f5a623;
+  --red:    #f06060;
+  --mono:   'Geist Mono', monospace;
+  --sans:   'Geist', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:13px;line-height:1.5}
+
+/* ── LOGIN ── */
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%, #29b6f610 0%, transparent 70%) var(--bg)}
+
+.lbox{background:var(--s2);border:1px solid var(--bd);border-radius:18px;padding:38px 36px;width:340px;
+  box-shadow:0 40px 80px #000a}
+
+.llogo{display:flex;align-items:center;gap:11px;margin-bottom:30px}
+.llogo .ic{width:40px;height:40px;background:linear-gradient(135deg,#29b6f6,#7c83f5);
+  border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.llogo h1{font-size:20px;font-weight:700;letter-spacing:-.4px}
+.llogo p{font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+label.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:7px}
+
+input{width:100%;background:var(--s1);border:1px solid var(--bd2);border-radius:8px;
+  padding:10px 13px;color:var(--tx);font-family:var(--mono);font-size:13px;
+  outline:none;transition:border-color .2s;margin-bottom:18px}
+input:focus{border-color:var(--hi)}
+
+.btn{width:100%;background:linear-gradient(135deg,#0288d1,#5c6bc0);border:none;
+  border-radius:8px;padding:11px;color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:var(--sans);transition:opacity .15s}
+.btn:hover{opacity:.88}
+
+.lerr{display:none;color:var(--red);font-size:11px;margin-top:10px;text-align:center;font-family:var(--mono)}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh}
+
+nav{background:var(--s1);border-bottom:1px solid var(--bd);height:54px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 24px;
+  position:sticky;top:0;z-index:50}
+
+.nav-l{display:flex;align-items:center;gap:12px}
+.nav-ic{width:30px;height:30px;background:linear-gradient(135deg,#29b6f6,#7c83f5);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-title{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.nav-title span{color:var(--hi)}
+
+.nav-r{display:flex;align-items:center;gap:8px}
+.chip{display:flex;align-items:center;gap:5px;background:var(--s2);border:1px solid var(--bd);
+  border-radius:16px;padding:4px 11px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.chip .d{width:6px;height:6px;border-radius:50%}
+.chip .d.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+.chip .d.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.sbtn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;
+  padding:5px 12px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.sbtn:hover{color:var(--hi);border-color:var(--hi)}
+
+main{padding:24px;max-width:1500px;margin:0 auto}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.sc{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;
+  position:relative;overflow:hidden;transition:border-color .2s}
+.sc:hover{border-color:var(--bd2)}
+.sc::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,var(--glow,transparent) 0%,transparent 60%);
+  pointer-events:none}
+.sc.g1{--glow:#29b6f60a}.sc.g2{--glow:#2dd4aa0a}.sc.g3{--glow:#f5a6230a}.sc.g4{--glow:#7c83f50a}
+.sl{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px}
+.sv{font-size:30px;font-weight:700;font-family:var(--mono);letter-spacing:-1px}
+.ss{font-size:10px;color:var(--muted);margin-top:3px}
+.si{position:absolute;top:16px;right:16px;font-size:20px;opacity:.35}
+
+/* ── TABLE ── */
+.th{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tt{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:7px}
+.tt::before{content:'';display:block;width:3px;height:13px;background:var(--hi);border-radius:2px}
+
+.tw{background:var(--s2);border:1px solid var(--bd);border-radius:13px;overflow:hidden}
+
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--s1);padding:10px 14px;text-align:left;font-size:9px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bd);
+  white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--bd);transition:background .1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#ffffff03}
+td{padding:12px 14px;vertical-align:middle}
+
+/* cells */
+.cn{font-weight:600;font-size:13px}
+.wu{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px;
+  display:flex;align-items:center;gap:4px}
+.wu::before{content:'👤';font-size:9px}
+
+.stc{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;font-family:var(--mono);white-space:nowrap;letter-spacing:.3px}
+.stc .d{width:5px;height:5px;border-radius:50%}
+.stc.active{background:#052e1680;color:var(--green);border:1px solid #052e16}
+.stc.active .d{background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite}
+.stc.idle{background:#3d2a0080;color:var(--amber);border:1px solid #3d2a00}
+.stc.idle .d{background:var(--amber)}
+.stc.offline{background:#1f090980;color:var(--red);border:1px solid #1f0909}
+.stc.offline .d{background:var(--red)}
+.stc.unknown{background:#1e293b80;color:var(--muted);border:1px solid #1e293b}
+.stc.unknown .d{background:var(--muted)}
+
+.tv{font-family:var(--mono);font-size:11px}
+.tv.act{color:var(--green)}.tv.idl{color:var(--amber)}.tv.tot{color:var(--tx)}
+
+.ls{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* sparkline */
+.spark{display:flex;align-items:flex-end;gap:2px;height:24px;width:70px}
+.sb{flex:1;border-radius:1px 1px 0 0;min-height:2px;transition:height .3s}
+
+/* ── MODAL ── */
+.ov{display:none;position:fixed;inset:0;background:#00000090;backdrop-filter:blur(3px);
+  z-index:200;align-items:center;justify-content:center}
+.ov.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--bd2);border-radius:16px;padding:28px;
+  width:480px;max-width:95vw;box-shadow:0 40px 80px #000a;animation:su .18s ease}
+@keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.mt{font-size:16px;font-weight:700}
+.ms{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px}
+.xb{background:var(--s1);border:1px solid var(--bd);border-radius:6px;width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);
+  transition:all .15s}
+.xb:hover{border-color:var(--red);color:var(--red)}
+
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.mstat{background:var(--s1);border:1px solid var(--bd);border-radius:9px;padding:13px}
+.msl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+  font-weight:700;margin-bottom:5px}
+.msv{font-size:18px;font-weight:700;font-family:var(--mono)}
+
+.ef{margin-bottom:13px}
+.ef label{display:block;font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.ef input{width:100%;background:var(--s1);border:1px solid var(--bd2);border-radius:7px;
+  padding:8px 12px;color:var(--tx);font-family:var(--mono);font-size:12px;outline:none;
+  transition:border-color .2s;margin-bottom:0}
+.ef input:focus{border-color:var(--hi)}
+
+.ma{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+.bdd{background:#450a0a;border:1px solid #7f1d1d;border-radius:7px;padding:7px 15px;
+  color:var(--red);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.bdd:hover{background:#7f1d1d}
+.bsv{background:linear-gradient(135deg,#0288d1,#5c6bc0);border:none;border-radius:7px;
+  padding:7px 18px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+
+/* loading / empty */
+.ld{display:flex;align-items:center;justify-content:center;padding:50px;
+  color:var(--muted);font-family:var(--mono);font-size:12px;gap:9px}
+.spin{width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--hi);
+  border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:50px;color:var(--muted);font-size:12px;line-height:2}
+
+@media(max-width:900px){.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){main{padding:14px}.stats{grid-template-columns:1fr}
+  thead th:nth-child(n+5){display:none}td:nth-child(n+5){display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="lbox">
+    <div class="llogo">
+      <div class="ic">⏱</div>
+      <div><h1>TimeTrack</h1><p>Admin Dashboard</p></div>
+    </div>
+    <label class="lbl">Password</label>
+    <input type="password" id="pw" placeholder="Enter admin password…" autocomplete="current-password">
+    <button class="btn" onclick="doLogin()">Sign In →</button>
+    <div class="lerr" id="lerr">Incorrect password</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav>
+    <div class="nav-l">
+      <div class="nav-ic">⏱</div>
+      <div class="nav-title">Time<span>Track</span></div>
+    </div>
+    <div class="nav-r">
+      <div class="chip"><div class="d on pulse"></div><span id="hdr-stat">— online</span></div>
+      <div class="chip"><div class="d" style="background:var(--hi)"></div><span>Live · 30s</span></div>
+      <button class="sbtn" onclick="doLogout()">Sign out</button>
+    </div>
+  </nav>
+
+  <main>
+    <div class="stats">
+      <div class="sc g1"><div class="sl">Total Machines</div><div class="sv" id="s-tot">—</div><div class="ss">registered endpoints</div><div class="si">🖥</div></div>
+      <div class="sc g2"><div class="sl">Online Now</div><div class="sv" id="s-on">—</div><div class="ss">heartbeat &lt; 90s ago</div><div class="si">🟢</div></div>
+      <div class="sc g3"><div class="sl">Today Active</div><div class="sv" id="s-act">—</div><div class="ss">combined all machines</div><div class="si">⚡</div></div>
+      <div class="sc g4"><div class="sl">Last Refresh</div><div class="sv" id="s-ref" style="font-size:17px">—</div><div class="ss">auto every 30s</div><div class="si">🔄</div></div>
+    </div>
+
+    <div class="th">
+      <div class="tt">All Machines (30)</div>
+      <button class="sbtn" onclick="load()">↻ Refresh</button>
+    </div>
+
+    <div class="tw" id="tbody">
+      <div class="ld"><div class="spin"></div> Loading…</div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ov" onclick="closeMod(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="mh">
+      <div>
+        <div class="mt" id="m-cn">—</div>
+        <div class="ms" id="m-wu">—</div>
+      </div>
+      <div class="xb" onclick="closeMod()">✕</div>
+    </div>
+    <div class="mgrid">
+      <div class="mstat"><div class="msl">Today Active</div><div class="msv" id="m-a" style="color:var(--green)">—</div></div>
+      <div class="mstat"><div class="msl">Today Idle</div><div class="msv" id="m-i" style="color:var(--amber)">—</div></div>
+      <div class="mstat"><div class="msl">Total Tracked</div><div class="msv" id="m-t">—</div></div>
+      <div class="mstat"><div class="msl">First Seen</div><div class="msv" id="m-f" style="font-size:13px;margin-top:4px">—</div></div>
+    </div>
+    <div class="ef">
+      <label>Display Name (optional override)</label>
+      <input type="text" id="m-dn" placeholder="e.g. Marketing PC">
+    </div>
+    <div style="font-size:10px;color:var(--muted);font-family:var(--mono);word-break:break-all">
+      Machine ID: <span id="m-id">—</span>
+    </div>
+    <div class="ma">
+      <button class="bdd" onclick="delMachine()">Delete</button>
+      <button class="bsv" onclick="saveMachine()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = (window.TT_API || '').replace(/\/$/,'');
+let TOKEN = localStorage.getItem('tt_tok') || '';
+let data  = [], sel = null, timer;
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function req(method, path, body) {
+  const r = await fetch(API + path, {
+    method,
+    headers: {'Content-Type':'application/json',
+              ...(TOKEN && {Authorization:`Bearer ${TOKEN}`})},
+    ...(body && {body: JSON.stringify(body)}),
+  });
+  if (r.status === 401) { doLogout(); throw 'auth'; }
+  if (!r.ok) throw await r.text();
+  return r.json();
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  try {
+    const d = await req('POST', '/api/admin/login', {password: document.getElementById('pw').value});
+    TOKEN = d.token;
+    localStorage.setItem('tt_tok', TOKEN);
+    showApp();
+  } catch { document.getElementById('lerr').style.display='block'; }
+}
+async function doLogout() {
+  try { await req('POST','/api/admin/logout'); } catch{}
+  TOKEN=''; localStorage.removeItem('tt_tok'); location.reload();
+}
+document.getElementById('pw').onkeydown = e => { if(e.key==='Enter') doLogin(); };
+
+function showApp() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display   = 'block';
+  load();
+  timer = setInterval(load, 30000);
+}
+
+// ── Format ────────────────────────────────────────────────────────────────────
+function dur(s) {
+  if (!s) return '0m';
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+}
+function ago(ts) {
+  if (!ts) return '—';
+  const s = Math.floor((Date.now()/1000) - ts);
+  if (s < 5)    return 'just now';
+  if (s < 60)   return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400)return `${Math.floor(s/3600)}h ago`;
+  return new Date(ts*1000).toLocaleDateString();
+}
+function fdate(ts) { return ts ? new Date(ts*1000).toLocaleDateString() : '—'; }
+function esc(s) { return String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function load() {
+  try {
+    const [stats, machines] = await Promise.all([
+      req('GET','/api/admin/stats'),
+      req('GET','/api/admin/machines'),
+    ]);
+    data = machines;
+    document.getElementById('s-tot').textContent = stats.total;
+    document.getElementById('s-on').textContent  = stats.online;
+    document.getElementById('s-act').textContent = dur(stats.today_active_sec);
+    document.getElementById('s-ref').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('hdr-stat').textContent = `${stats.online} online`;
+    renderTable(machines);
+  } catch(e) {
+    if (e !== 'auth')
+      document.getElementById('tbody').innerHTML =
+        `<div class="empty">⚠️ Could not reach backend<br><small style="font-family:monospace">${API||'(no API URL set)'}</small></div>`;
+  }
+}
+
+function spark(trend) {
+  const max = Math.max(...trend.map(t=>t.active), 1);
+  const today = new Date().toISOString().slice(0,10);
+  return `<div class="spark">${trend.map(t=>{
+    const h = Math.max(Math.round(t.active/max*24),2);
+    return `<div class="sb" title="${t.date}: ${dur(t.active)}" style="height:${h}px;background:${t.date===today?'var(--hi)':'var(--bd2)'}"></div>`;
+  }).join('')}</div>`;
+}
+
+function renderTable(rows) {
+  if (!rows.length) {
+    document.getElementById('tbody').innerHTML =
+      '<div class="empty">No machines yet.<br>Install the agent on each Windows PC to get started.</div>';
+    return;
+  }
+  document.getElementById('tbody').innerHTML = `
+  <table>
+    <thead><tr>
+      <th>Machine</th><th>Status</th>
+      <th>Today Active</th><th>Today Idle</th>
+      <th>Total</th><th>Last Active</th><th>7 Days</th>
+    </tr></thead>
+    <tbody>${rows.map((m,i) => `
+    <tr onclick="openMod(${i})">
+      <td>
+        <div class="cn">${esc(m.display_name || m.computer_name)}</div>
+        <div class="wu">${esc(m.windows_user)}</div>
+      </td>
+      <td><span class="stc ${m.status}"><span class="d"></span>${m.status}</span></td>
+      <td><span class="tv act">${dur(m.today_active)}</span></td>
+      <td><span class="tv idl">${dur(m.today_idle)}</span></td>
+      <td><span class="tv tot">${dur(m.total)}</span></td>
+      <td><span class="ls">${ago(m.last_seen)}</span></td>
+      <td>${spark(m.trend)}</td>
+    </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+function openMod(i) {
+  sel = data[i];
+  document.getElementById('m-cn').textContent = sel.display_name || sel.computer_name;
+  document.getElementById('m-wu').textContent = `👤 ${sel.windows_user}  ·  🖥 ${sel.computer_name}`;
+  document.getElementById('m-a').textContent  = dur(sel.today_active);
+  document.getElementById('m-i').textContent  = dur(sel.today_idle);
+  document.getElementById('m-t').textContent  = dur(sel.total);
+  document.getElementById('m-f').textContent  = fdate(sel.first_seen);
+  document.getElementById('m-id').textContent = sel.id;
+  document.getElementById('m-dn').value       = sel.display_name || '';
+  document.getElementById('ov').classList.add('open');
+}
+function closeMod(e) {
+  if (!e || e.target === document.getElementById('ov'))
+    document.getElementById('ov').classList.remove('open');
+}
+async function saveMachine() {
+  if (!sel) return;
+  await req('PATCH', `/api/admin/machines/${sel.id}`, {display_name: document.getElementById('m-dn').value || null});
+  closeMod(); load();
+}
+async function delMachine() {
+  if (!sel || !confirm(`Delete "${sel.display_name || sel.computer_name}" and all its data?`)) return;
+  await req('DELETE', `/api/admin/machines/${sel.id}`);
+  closeMod(); load();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+TOKEN ? showApp() : (document.getElementById('login').style.display='flex');
+</script>
+</body>
+</html>
